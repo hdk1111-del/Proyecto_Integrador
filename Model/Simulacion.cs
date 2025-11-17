@@ -22,8 +22,10 @@ namespace Proyecto_Integrador.Model
         public double V { get; set; }     
         public double V0 { get; set; }   
         public double TiempoMaximo { get; set; }   
-        public double Paso { get; set; }         
-        
+        public double Paso { get; set; }
+        // 👇 NUEVO: comentario que escribe el alumno sobre esta simulación
+        public string ComentarioEstudiante { get; set; } = "";
+
         public DateTime Fecha { get; set; } = DateTime.Now;
     }
 }

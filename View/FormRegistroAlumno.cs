@@ -15,18 +15,39 @@ namespace Proyecto_Integrador.View
 
             btnRegistrar.Click += btnRegistrar_Click;
         }
+        private static string GenerarNuevoId(List<Usuario> usuarios)
+        {
+            int max = 0;
 
+            foreach (var u in usuarios)
+            {
+                if (u.Rol == "Student" && !string.IsNullOrWhiteSpace(u.Id))
+                {
+                    string numPart = u.Id;
+                    int i = 0;
+                    while (i < numPart.Length && !char.IsDigit(numPart[i]))
+                        i++;
+
+                    if (i < numPart.Length)
+                    {
+                        numPart = numPart.Substring(i);
+                        if (int.TryParse(numPart, out int n) && n > max)
+                            max = n;
+                    }
+                }
+            }
+
+            int siguiente = max + 1;
+            return $"E{siguiente:000}";  // → E001, E002, E003...
+        }
         private void btnRegistrar_Click(object? sender, EventArgs e)
         {
-            string id = txtId.Text.Trim();
             string nombreCompleto = txtNombreCompleto.Text.Trim();
             string usuario = txtUsuario.Text.Trim();
             string pass = txtPassword.Text.Trim();
             string confirmar = txtConfirmar.Text.Trim();
 
-           
-            if (string.IsNullOrWhiteSpace(id) ||
-                string.IsNullOrWhiteSpace(nombreCompleto) ||
+            if (string.IsNullOrWhiteSpace(nombreCompleto) ||
                 string.IsNullOrWhiteSpace(usuario) ||
                 string.IsNullOrWhiteSpace(pass) ||
                 string.IsNullOrWhiteSpace(confirmar))
@@ -36,7 +57,6 @@ namespace Proyecto_Integrador.View
                 return;
             }
 
-           
             if (pass != confirmar)
             {
                 MessageBox.Show("Las contraseñas no coinciden.", "Error",
@@ -44,18 +64,8 @@ namespace Proyecto_Integrador.View
                 return;
             }
 
-         
             var usuarios = FileManager.LeerUsuarios();
 
-           
-            if (usuarios.Any(u => u.Id == id))
-            {
-                MessageBox.Show("Ya existe un usuario con ese ID/matrícula.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-           
             if (usuarios.Any(u => u.Nombre.Equals(usuario, StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show("Ese nombre de usuario ya está en uso.", "Error",
@@ -63,10 +73,16 @@ namespace Proyecto_Integrador.View
                 return;
             }
 
-       
+            // ⭐ GENERAR ID AUTOMÁTICO ⭐
+            string nuevoId = GenerarNuevoId(usuarios);
+
+            // Lo asignamos al textbox aunque esté oculto (no pasa nada)
+            txtId.Text = nuevoId;
+
+            // Crear el usuario
             var nuevo = new Usuario
             {
-                Id = id,
+                Id = nuevoId,
                 NombreCompleto = nombreCompleto,
                 Nombre = usuario,
                 Password = pass,
@@ -76,8 +92,8 @@ namespace Proyecto_Integrador.View
             usuarios.Add(nuevo);
             FileManager.GuardarUsuarios(usuarios);
 
-            MessageBox.Show("Alumno registrado correctamente.", "Éxito",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Alumno registrado correctamente.\nID asignado: {nuevoId}",
+                "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             this.DialogResult = DialogResult.OK;
             this.Close();

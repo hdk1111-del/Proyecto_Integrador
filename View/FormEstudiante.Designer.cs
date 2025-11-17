@@ -49,11 +49,15 @@
             lblModo = new Label();
             cmbTipo = new ComboBox();
             lblTipo = new Label();
+            txtComentarioEstudiante = new TextBox();
+            label1 = new Label();
             panelParams.SuspendLayout();
             SuspendLayout();
             // 
             // panelParams
             // 
+            panelParams.Controls.Add(label1);
+            panelParams.Controls.Add(txtComentarioEstudiante);
             panelParams.Controls.Add(btnGuardar);
             panelParams.Controls.Add(btnSimular);
             panelParams.Controls.Add(txtDt);
@@ -77,12 +81,12 @@
             panelParams.Dock = DockStyle.Left;
             panelParams.Location = new Point(0, 0);
             panelParams.Name = "panelParams";
-            panelParams.Size = new Size(327, 571);
+            panelParams.Size = new Size(327, 637);
             panelParams.TabIndex = 0;
             // 
             // btnGuardar
             // 
-            btnGuardar.Location = new Point(172, 461);
+            btnGuardar.Location = new Point(157, 549);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(112, 34);
             btnGuardar.TabIndex = 19;
@@ -91,7 +95,7 @@
             // 
             // btnSimular
             // 
-            btnSimular.Location = new Point(44, 461);
+            btnSimular.Location = new Point(27, 549);
             btnSimular.Name = "btnSimular";
             btnSimular.Size = new Size(112, 34);
             btnSimular.TabIndex = 18;
@@ -253,11 +257,29 @@
             lblTipo.TabIndex = 0;
             lblTipo.Text = "Circuito tipo:";
             // 
+            // txtComentarioEstudiante
+            // 
+            txtComentarioEstudiante.Location = new Point(133, 475);
+            txtComentarioEstudiante.Multiline = true;
+            txtComentarioEstudiante.Name = "txtComentarioEstudiante";
+            txtComentarioEstudiante.ScrollBars = ScrollBars.Vertical;
+            txtComentarioEstudiante.Size = new Size(150, 46);
+            txtComentarioEstudiante.TabIndex = 20;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(12, 478);
+            label1.Name = "label1";
+            label1.Size = new Size(109, 25);
+            label1.TabIndex = 21;
+            label1.Text = "Comentario:";
+            // 
             // FormEstudiante
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(978, 571);
+            ClientSize = new Size(978, 637);
             Controls.Add(panelParams);
             Name = "FormEstudiante";
             StartPosition = FormStartPosition.CenterScreen;
@@ -290,5 +312,7 @@
         private Button btnSimular;
         private TextBox txtDt;
         private Label lblDt;
+        private TextBox txtComentarioEstudiante;
+        private Label label1;
     }
 }

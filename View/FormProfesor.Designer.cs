@@ -169,7 +169,7 @@
             // 
             // btnCalificar
             // 
-            btnCalificar.Location = new Point(327, 86);
+            btnCalificar.Location = new Point(66, 93);
             btnCalificar.Name = "btnCalificar";
             btnCalificar.Size = new Size(184, 42);
             btnCalificar.TabIndex = 4;
@@ -180,15 +180,17 @@
             // txtComentario
             // 
             txtComentario.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtComentario.Location = new Point(316, 30);
+            txtComentario.Location = new Point(293, 58);
+            txtComentario.Multiline = true;
             txtComentario.Name = "txtComentario";
-            txtComentario.Size = new Size(200, 31);
+            txtComentario.ScrollBars = ScrollBars.Vertical;
+            txtComentario.Size = new Size(200, 86);
             txtComentario.TabIndex = 3;
             // 
             // lblComentario
             // 
             lblComentario.AutoSize = true;
-            lblComentario.Location = new Point(210, 30);
+            lblComentario.Location = new Point(206, 30);
             lblComentario.Name = "lblComentario";
             lblComentario.Size = new Size(109, 25);
             lblComentario.TabIndex = 2;

@@ -49,6 +49,7 @@
             lblId.Size = new Size(123, 25);
             lblId.TabIndex = 0;
             lblId.Text = "ID / Matrícula:";
+            lblId.Visible = false;
             // 
             // txtId
             // 
@@ -56,6 +57,7 @@
             txtId.Name = "txtId";
             txtId.Size = new Size(220, 31);
             txtId.TabIndex = 1;
+            txtId.Visible = false;
             // 
             // lblNombreCompleto
             // 
