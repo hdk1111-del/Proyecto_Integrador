@@ -30,6 +30,9 @@
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             panelTop = new Panel();
             btnRefrescar = new Button();
             btnBuscar = new Button();
@@ -39,6 +42,7 @@
             lblAlumno = new Label();
             dgvSimulaciones = new DataGridView();
             panelRight = new Panel();
+            chartDetalle = new System.Windows.Forms.DataVisualization.Charting.Chart();
             grpCalificar = new GroupBox();
             btnCalificar = new Button();
             txtComentario = new TextBox();
@@ -49,6 +53,7 @@
             panelTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSimulaciones).BeginInit();
             panelRight.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)chartDetalle).BeginInit();
             grpCalificar.SuspendLayout();
             SuspendLayout();
             // 
@@ -144,6 +149,7 @@
             // panelRight
             // 
             panelRight.BackColor = SystemColors.Info;
+            panelRight.Controls.Add(chartDetalle);
             panelRight.Controls.Add(grpCalificar);
             panelRight.Controls.Add(lblResumen);
             panelRight.Dock = DockStyle.Fill;
@@ -151,6 +157,26 @@
             panelRight.Name = "panelRight";
             panelRight.Size = new Size(538, 544);
             panelRight.TabIndex = 2;
+            // 
+            // chartDetalle
+            // 
+            chartArea1.Name = "main";
+            chartDetalle.ChartAreas.Add(chartArea1);
+            chartDetalle.Dock = DockStyle.Fill;
+            legend1.Name = "Legend1";
+            chartDetalle.Legends.Add(legend1);
+            chartDetalle.Location = new Point(0, 0);
+            chartDetalle.Name = "chartDetalle";
+            series1.BorderWidth = 3;
+            series1.ChartArea = "main";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series1.Legend = "Legend1";
+            series1.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series1.Name = "Simulacion";
+            chartDetalle.Series.Add(series1);
+            chartDetalle.Size = new Size(538, 372);
+            chartDetalle.TabIndex = 2;
+            chartDetalle.Text = "chart1";
             // 
             // grpCalificar
             // 
@@ -242,6 +268,7 @@
             ((System.ComponentModel.ISupportInitialize)dgvSimulaciones).EndInit();
             panelRight.ResumeLayout(false);
             panelRight.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)chartDetalle).EndInit();
             grpCalificar.ResumeLayout(false);
             grpCalificar.PerformLayout();
             ResumeLayout(false);
@@ -263,5 +290,7 @@
         private TextBox txtNota;
         private TextBox txtComentario;
         private Button btnCalificar;
+      
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartDetalle;
     }
 }

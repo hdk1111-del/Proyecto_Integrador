@@ -10,9 +10,7 @@ namespace Proyecto_Integrador.View
 {
     public partial class FormEstudiante : Form
     {
-        private Usuario _usuario;
-        private Panel panelChart;
-        private Chart chartSim;
+        private readonly Usuario _usuario;
         private Label lblTau;
         private Label lblBienvenida;
 
@@ -21,9 +19,10 @@ namespace Proyecto_Integrador.View
             InitializeComponent();
             _usuario = usuario;
 
-            // Crear panel y chart (no desaparece nunca)
-            CrearChartPermanente();
+         
+            ConfigurarChart();
 
+         
             lblBienvenida = new Label
             {
                 Text = $"Bienvenido, {_usuario.NombreCompleto}  ({_usuario.Id})",
@@ -33,6 +32,7 @@ namespace Proyecto_Integrador.View
             };
             panelParams.Controls.Add(lblBienvenida);
 
+          
             lblTau = new Label
             {
                 Text = "τ = ",
@@ -40,39 +40,27 @@ namespace Proyecto_Integrador.View
                 AutoSize = true
             };
             panelParams.Controls.Add(lblTau);
-
             lblTau.Location = new Point(txtDt.Left, txtDt.Bottom + 10);
 
+            
             cmbTipo.Items.AddRange(new[] { "RC", "RL" });
             cmbTipo.SelectedIndex = 0;
             ConfigurarModoSegunTipo();
 
+            
             cmbTipo.SelectedIndexChanged += cmbTipo_SelectedIndexChanged;
             btnSimular.Click += btnSimular_Click;
             btnGuardar.Click += btnGuardar_Click;
+
+          
+            btnVerCorrienteRC.Click += btnVerCorrienteRC_Click;
         }
 
-        private void CrearChartPermanente()
+        private void ConfigurarChart()
         {
-            panelChart = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White
-            };
-            Controls.Add(panelChart);
-            panelChart.BringToFront();
-
-            chartSim = new Chart
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.WhiteSmoke
-            };
-
-            var area = new ChartArea("main");
-            chartSim.ChartAreas.Add(area);
+            var area = chartSim.ChartAreas["main"];
             chartSim.Legends.Clear();
 
-            // Mejora visual general
             chartSim.AntiAliasing = AntiAliasingStyles.All;
             chartSim.TextAntiAliasingQuality = TextAntiAliasingQuality.High;
 
@@ -83,15 +71,12 @@ namespace Proyecto_Integrador.View
 
             area.AxisX.LabelStyle.Format = "0.###";
             area.AxisY.LabelStyle.Format = "0.###";
-
-            panelChart.Controls.Add(chartSim);
         }
 
         private void cmbTipo_SelectedIndexChanged(object sender, EventArgs e)
         {
             ConfigurarModoSegunTipo();
         }
-
         private void ConfigurarModoSegunTipo()
         {
             cmbModo.Items.Clear();
@@ -100,15 +85,23 @@ namespace Proyecto_Integrador.View
             {
                 cmbModo.Items.AddRange(new[] { "Carga", "Descarga" });
                 cmbModo.SelectedIndex = 0;
+
                 txtC.Enabled = true;
                 txtL.Enabled = false;
+
+                
+                btnVerCorrienteRC.Enabled = true;
             }
-            else
+            else  
             {
                 cmbModo.Items.AddRange(new[] { "Encendido", "Apagado" });
                 cmbModo.SelectedIndex = 0;
+
                 txtC.Enabled = false;
                 txtL.Enabled = true;
+
+            
+                btnVerCorrienteRC.Enabled = false;
             }
         }
 
@@ -164,109 +157,221 @@ namespace Proyecto_Integrador.View
 
         private void DibujarSimulacion(Simulacion s)
         {
-            chartSim.Series.Clear();
+            var serie = chartSim.Series["Simulacion"];
+            serie.Points.Clear();
 
-            var serie = new Series("Simulación")
-            {
-                ChartType = SeriesChartType.Spline,   // curva suave
-                ChartArea = "main",
-                BorderWidth = 3,
-                MarkerStyle = MarkerStyle.Circle,
-                MarkerSize = 4,
-                IsValueShownAsLabel = false
-            };
+            
+            serie.ChartType = SeriesChartType.Spline;
+            serie.BorderWidth = 3;
+            serie.MarkerStyle = MarkerStyle.Circle;
+            serie.MarkerSize = 4;
 
-            // Color distinto según el tipo de circuito
+    
             if (s.TipoCircuito == "RC")
-            {
                 serie.Color = Color.SteelBlue;
-                serie.BorderColor = Color.SteelBlue;
-            }
-            else // RL
-            {
+            else
                 serie.Color = Color.IndianRed;
-                serie.BorderColor = Color.IndianRed;
-            }
 
-            // 1️⃣ Constante de tiempo τ
+         
             double tau = s.TipoCircuito == "RC"
                 ? s.R * s.C
                 : s.L / s.R;
 
             if (tau <= 0)
             {
-                MessageBox.Show("Los parámetros dan una constante de tiempo no válida (τ <= 0).");
+                MessageBox.Show("Los parámetros producen una constante de tiempo inválida.");
                 return;
             }
 
-            // 2️⃣ Rango de tiempo a graficar: hasta 5·τ o tmax, lo que sea menor
-            double tMaxGrafica = Math.Min(s.TiempoMaximo, 5.0 * tau);
+            
+            double tMaxGrafica = Math.Min(s.TiempoMaximo, 5 * tau);
             if (tMaxGrafica <= 0) tMaxGrafica = s.TiempoMaximo;
-            if (tMaxGrafica <= 0) tMaxGrafica = tau * 5; // último fallback
+            if (tMaxGrafica <= 0) tMaxGrafica = 5 * tau;
 
-            // 3️⃣ Número de puntos y paso de simulación SOLO para la gráfica
-            int nPuntos = 300;
-            double dt = tMaxGrafica / nPuntos;
+       
+            int n = 300;
+            double dt = tMaxGrafica / n;
 
-            // 4️⃣ Generar puntos directamente en la serie
-            for (double time = 0.0; time <= tMaxGrafica + dt / 2.0; time += dt)
+            double maxY = 0;
+
+            for (double t = 0; t <= tMaxGrafica + dt / 2.0; t += dt)
             {
-                double valor;
+                double y;
 
                 if (s.TipoCircuito == "RC")
                 {
-                    valor = s.Modo == "Descarga"
-                        ? s.V0 * Math.Exp(-time / tau)
-                        : s.V * (1 - Math.Exp(-time / tau));
+                    y = s.Modo == "Descarga"
+                        ? s.V0 * Math.Exp(-t / tau)
+                        : s.V * (1 - Math.Exp(-t / tau));
                 }
-                else // RL
+                else 
                 {
-                    valor = s.Modo == "Apagado"
-                        ? (s.V / s.R) * Math.Exp(-time / tau)
-                        : (s.V / s.R) * (1 - Math.Exp(-time / tau));
+                    y = s.Modo == "Apagado"
+                        ? (s.V / s.R) * Math.Exp(-t / tau)
+                        : (s.V / s.R) * (1 - Math.Exp(-t / tau));
                 }
 
-                serie.Points.AddXY(time, valor);
+                if (y > maxY) maxY = y;
+                serie.Points.AddXY(t, y);
             }
 
-            chartSim.Series.Add(serie);
+            if (maxY <= 0) maxY = 1;
 
-            // 🔧 Configuración de ejes
+            
             var area = chartSim.ChartAreas["main"];
+
             area.AxisX.Title = "Tiempo (s)";
             area.AxisY.Title = s.TipoCircuito == "RC" ? "Voltaje (V)" : "Corriente (A)";
 
-            // Fondo con degradado según tipo
-            area.BackColor = Color.White;
-            area.BackSecondaryColor = (s.TipoCircuito == "RC")
-                ? Color.FromArgb(230, 240, 255)   // azul clarito
-                : Color.FromArgb(255, 235, 235);  // rojo clarito
-            area.BackGradientStyle = GradientStyle.TopBottom;
-
-            // Rejilla suave
-            area.AxisX.MajorGrid.LineColor = Color.LightGray;
-            area.AxisY.MajorGrid.LineColor = Color.LightGray;
-            area.AxisX.MinorGrid.Enabled = false;
-            area.AxisY.MinorGrid.Enabled = false;
-
-            // 👉 Zoom al rango útil [0, tMaxGrafica]
+           
             area.AxisX.Minimum = 0;
             area.AxisX.Maximum = tMaxGrafica;
             area.AxisX.Interval = tMaxGrafica / 5.0;
 
-            // Escala del eje Y para que no se “aplane”
-            double valorFinal = (s.TipoCircuito == "RC") ? s.V : (s.V / s.R);
             area.AxisY.Minimum = 0;
-            area.AxisY.Maximum = valorFinal * 1.1; // 10% más arriba del valor final
+            area.AxisY.Maximum = maxY * 1.1; 
 
-            // Líneas τ, 2τ, 3τ solo si caben en el rango mostrado
+            area.BackColor = Color.White;
+            area.BackSecondaryColor = s.TipoCircuito == "RC"
+                ? Color.FromArgb(230, 240, 255)   // azul suave
+                : Color.FromArgb(255, 235, 235);  // rojo suave
+            area.BackGradientStyle = GradientStyle.TopBottom;
+
+        
             area.AxisX.StripLines.Clear();
+
+           
             if (tau <= tMaxGrafica) AgregarLineaVertical(area, tau, "τ");
             if (2 * tau <= tMaxGrafica) AgregarLineaVertical(area, 2 * tau, "2τ");
             if (3 * tau <= tMaxGrafica) AgregarLineaVertical(area, 3 * tau, "3τ");
 
             lblTau.Text = $"τ = {tau:0.###} s";
         }
+
+
+        private void btnVerCorrienteRC_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var sim = LeerFormulario();
+
+                if (sim.TipoCircuito != "RC")
+                {
+                    MessageBox.Show(
+                        "La gráfica de corriente solo aplica para circuitos RC.",
+                        "Aviso",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    return;
+                }
+
+                DibujarCorrienteRC(sim);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error al graficar la corriente: {ex.Message}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private void DibujarCorrienteRC(Simulacion s)
+        {
+            // Aseguramos que es RC
+            if (s.TipoCircuito != "RC")
+                return;
+
+            var area = chartSim.ChartAreas["main"];
+            var serie = chartSim.Series["Simulacion"];
+
+          
+            serie.Points.Clear();
+
+            
+            serie.ChartType = SeriesChartType.Spline;
+            serie.BorderWidth = 3;
+            serie.MarkerStyle = MarkerStyle.Circle;
+            serie.MarkerSize = 4;
+            serie.Color = Color.SteelBlue;
+
+            // 1️⃣ Constante de tiempo τ = R · C
+            double tau = s.R * s.C;
+            if (tau <= 0)
+            {
+                MessageBox.Show("Los parámetros dan una constante de tiempo no válida (τ ≤ 0).");
+                return;
+            }
+
+           
+            double tMaxGrafica = Math.Min(s.TiempoMaximo, 5.0 * tau);
+            if (tMaxGrafica <= 0) tMaxGrafica = s.TiempoMaximo;
+            if (tMaxGrafica <= 0) tMaxGrafica = 5.0 * tau;
+
+           
+            int nPuntos = 300;
+            double dt = tMaxGrafica / nPuntos;
+
+            double maxAbs = 0.0;
+
+       
+            for (double time = 0.0; time <= tMaxGrafica + dt / 2.0; time += dt)
+            {
+                double corriente;
+
+                if (s.Modo == "Descarga")
+                {
+                    // Descarga: I(t) = -(V0/R) * e^(-t/RC)
+                    corriente = -(s.V0 / s.R) * Math.Exp(-time / tau);
+                }
+                else 
+                {
+               
+                    corriente = (s.V / s.R) * Math.Exp(-time / tau);
+                }
+
+                if (Math.Abs(corriente) > maxAbs)
+                    maxAbs = Math.Abs(corriente);
+
+                serie.Points.AddXY(time, corriente);
+            }
+
+            if (maxAbs <= 0) maxAbs = 1e-6;
+
+            
+            area.AxisX.Title = "Tiempo (s)";
+            area.AxisY.Title = "Corriente (A)";
+
+       
+            area.BackColor = Color.White;
+            area.BackSecondaryColor = Color.FromArgb(230, 240, 255);
+            area.BackGradientStyle = GradientStyle.TopBottom;
+
+            area.AxisX.MajorGrid.LineColor = Color.LightGray;
+            area.AxisY.MajorGrid.LineColor = Color.LightGray;
+            area.AxisX.MinorGrid.Enabled = false;
+            area.AxisY.MinorGrid.Enabled = false;
+
+
+            area.AxisX.Minimum = 0;
+            area.AxisX.Maximum = tMaxGrafica;
+            area.AxisX.Interval = tMaxGrafica / 5.0;
+
+            
+            area.AxisY.Minimum = -maxAbs * 1.1;
+            area.AxisY.Maximum = maxAbs * 1.1;
+
+        
+            area.AxisX.StripLines.Clear();
+            if (tau <= tMaxGrafica) AgregarLineaVertical(area, tau, "τ");
+            if (2.0 * tau <= tMaxGrafica) AgregarLineaVertical(area, 2.0 * tau, "2τ");
+            if (3.0 * tau <= tMaxGrafica) AgregarLineaVertical(area, 3.0 * tau, "3τ");
+
+            lblTau.Text = $"τ = {tau:0.###} s (corriente RC)";
+        }
+
+ 
 
         private static void AgregarLineaVertical(ChartArea area, double x, string etiqueta)
         {
@@ -277,6 +382,7 @@ namespace Proyecto_Integrador.View
                 BackColor = Color.FromArgb(70, Color.Gray),
                 Text = etiqueta
             };
+
             area.AxisX.StripLines.Add(strip);
         }
     }

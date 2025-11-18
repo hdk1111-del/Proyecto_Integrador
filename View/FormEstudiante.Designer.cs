@@ -28,7 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             panelParams = new Panel();
+            label1 = new Label();
+            txtComentarioEstudiante = new TextBox();
             btnGuardar = new Button();
             btnSimular = new Button();
             txtDt = new TextBox();
@@ -49,13 +54,15 @@
             lblModo = new Label();
             cmbTipo = new ComboBox();
             lblTipo = new Label();
-            txtComentarioEstudiante = new TextBox();
-            label1 = new Label();
+            chartSim = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            btnVerCorrienteRC = new Button();
             panelParams.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)chartSim).BeginInit();
             SuspendLayout();
             // 
             // panelParams
             // 
+            panelParams.Controls.Add(btnVerCorrienteRC);
             panelParams.Controls.Add(label1);
             panelParams.Controls.Add(txtComentarioEstudiante);
             panelParams.Controls.Add(btnGuardar);
@@ -84,6 +91,24 @@
             panelParams.Size = new Size(327, 637);
             panelParams.TabIndex = 0;
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(12, 478);
+            label1.Name = "label1";
+            label1.Size = new Size(109, 25);
+            label1.TabIndex = 21;
+            label1.Text = "Comentario:";
+            // 
+            // txtComentarioEstudiante
+            // 
+            txtComentarioEstudiante.Location = new Point(133, 475);
+            txtComentarioEstudiante.Multiline = true;
+            txtComentarioEstudiante.Name = "txtComentarioEstudiante";
+            txtComentarioEstudiante.ScrollBars = ScrollBars.Vertical;
+            txtComentarioEstudiante.Size = new Size(150, 46);
+            txtComentarioEstudiante.TabIndex = 20;
+            // 
             // btnGuardar
             // 
             btnGuardar.Location = new Point(157, 549);
@@ -108,7 +133,7 @@
             txtDt.Name = "txtDt";
             txtDt.Size = new Size(116, 31);
             txtDt.TabIndex = 17;
-            txtDt.Text = "0.01";
+            txtDt.Text = "0,01";
             // 
             // lblDt
             // 
@@ -176,7 +201,7 @@
             txtL.Name = "txtL";
             txtL.Size = new Size(150, 31);
             txtL.TabIndex = 9;
-            txtL.Text = "0.5";
+            txtL.Text = "0,5";
             // 
             // lblL
             // 
@@ -193,7 +218,7 @@
             txtC.Name = "txtC";
             txtC.Size = new Size(150, 31);
             txtC.TabIndex = 7;
-            txtC.Text = "0.00047";
+            txtC.Text = "0,00047";
             // 
             // lblC
             // 
@@ -206,7 +231,7 @@
             // 
             // txtR
             // 
-            txtR.Location = new Point(112, 12);
+            txtR.Location = new Point(138, 98);
             txtR.Name = "txtR";
             txtR.Size = new Size(208, 31);
             txtR.TabIndex = 5;
@@ -225,7 +250,7 @@
             // 
             cmbModo.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbModo.FormattingEnabled = true;
-            cmbModo.Location = new Point(138, 53);
+            cmbModo.Location = new Point(133, 53);
             cmbModo.Name = "cmbModo";
             cmbModo.Size = new Size(182, 33);
             cmbModo.TabIndex = 3;
@@ -243,7 +268,7 @@
             // 
             cmbTipo.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTipo.FormattingEnabled = true;
-            cmbTipo.Location = new Point(138, 96);
+            cmbTipo.Location = new Point(133, 14);
             cmbTipo.Name = "cmbTipo";
             cmbTipo.Size = new Size(182, 33);
             cmbTipo.TabIndex = 1;
@@ -257,35 +282,48 @@
             lblTipo.TabIndex = 0;
             lblTipo.Text = "Circuito tipo:";
             // 
-            // txtComentarioEstudiante
+            // chartSim
             // 
-            txtComentarioEstudiante.Location = new Point(133, 475);
-            txtComentarioEstudiante.Multiline = true;
-            txtComentarioEstudiante.Name = "txtComentarioEstudiante";
-            txtComentarioEstudiante.ScrollBars = ScrollBars.Vertical;
-            txtComentarioEstudiante.Size = new Size(150, 46);
-            txtComentarioEstudiante.TabIndex = 20;
+            chartArea2.Name = "main";
+            chartSim.ChartAreas.Add(chartArea2);
+            chartSim.Dock = DockStyle.Fill;
+            legend2.Name = "Legend1";
+            chartSim.Legends.Add(legend2);
+            chartSim.Location = new Point(327, 0);
+            chartSim.Name = "chartSim";
+            series2.BorderWidth = 3;
+            series2.ChartArea = "main";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series2.Legend = "Legend1";
+            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series2.Name = "Simulacion";
+            chartSim.Series.Add(series2);
+            chartSim.Size = new Size(651, 637);
+            chartSim.TabIndex = 1;
+            chartSim.Text = "chart1";
             // 
-            // label1
+            // btnVerCorrienteRC
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(12, 478);
-            label1.Name = "label1";
-            label1.Size = new Size(109, 25);
-            label1.TabIndex = 21;
-            label1.Text = "Comentario:";
+            btnVerCorrienteRC.Location = new Point(3, 435);
+            btnVerCorrienteRC.Name = "btnVerCorrienteRC";
+            btnVerCorrienteRC.Size = new Size(178, 34);
+            btnVerCorrienteRC.TabIndex = 22;
+            btnVerCorrienteRC.Text = "Ver corriente";
+            btnVerCorrienteRC.UseVisualStyleBackColor = true;
             // 
             // FormEstudiante
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(978, 637);
+            Controls.Add(chartSim);
             Controls.Add(panelParams);
             Name = "FormEstudiante";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Simulaciones – Estudiante";
             panelParams.ResumeLayout(false);
             panelParams.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)chartSim).EndInit();
             ResumeLayout(false);
         }
 
@@ -314,5 +352,7 @@
         private Label lblDt;
         private TextBox txtComentarioEstudiante;
         private Label label1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartSim;
+        private Button btnVerCorrienteRC;
     }
 }

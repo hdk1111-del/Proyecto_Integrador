@@ -17,7 +17,6 @@ namespace Proyecto_Integrador.View
         private List<Simulacion> _todas = new();
         private List<Calificacion> _califs = new();
 
-        private Chart chartDetalle;
         private ComboBox cmbAlumnos;
         private Label lblAlumno;
 
@@ -29,17 +28,15 @@ namespace Proyecto_Integrador.View
             Text = $"Panel del Profesor – {_usuario.Nombre}";
             StartPosition = FormStartPosition.CenterScreen;
 
-            // El profesor SOLO LEE el comentario
             txtComentario.ReadOnly = true;
 
             dgvSimulaciones.AutoGenerateColumns = true;
             dgvSimulaciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvSimulaciones.MultiSelect = false;
             dgvSimulaciones.ReadOnly = true;
-            dgvSimulaciones.AutoGenerateColumns = true;
 
             AsegurarComboAlumnos();
-            CrearChart();
+            ConfigurarChart();
 
             dgvSimulaciones.SelectionChanged += (_, __) => MostrarSeleccion();
             dgvSimulaciones.DataBindingComplete += dgvSimulaciones_DataBindingComplete;
@@ -58,6 +55,23 @@ namespace Proyecto_Integrador.View
             btnCalificar.Click += btnCalificar_Click;
 
             CargarSimulaciones();
+        }
+
+        private void ConfigurarChart()
+        {
+            var area = chartDetalle.ChartAreas["main"];
+            chartDetalle.Legends.Clear();
+
+            chartDetalle.AntiAliasing = AntiAliasingStyles.All;
+            chartDetalle.TextAntiAliasingQuality = TextAntiAliasingQuality.High;
+
+            area.AxisX.MajorGrid.LineColor = Color.LightGray;
+            area.AxisY.MajorGrid.LineColor = Color.LightGray;
+            area.AxisX.MinorGrid.Enabled = false;
+            area.AxisY.MinorGrid.Enabled = false;
+
+            area.AxisX.LabelStyle.Format = "0.###";
+            area.AxisY.LabelStyle.Format = "0.###";
         }
 
         private void AsegurarComboAlumnos()
@@ -109,42 +123,6 @@ namespace Proyecto_Integrador.View
             }
         }
 
-        private void CrearChart()
-        {
-            var right = this.Controls.Find("panelRight", true).FirstOrDefault() as Panel;
-            if (right == null)
-            {
-                right = new Panel { Name = "panelRight", Dock = DockStyle.Fill, BackColor = Color.White };
-                Controls.Add(right);
-                right.BringToFront();
-            }
-
-            chartDetalle = new Chart
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.WhiteSmoke
-            };
-
-            var area = new ChartArea("main");
-            chartDetalle.ChartAreas.Add(area);
-            chartDetalle.Legends.Clear();
-
-            // Mejora visual general
-            chartDetalle.AntiAliasing = AntiAliasingStyles.All;
-            chartDetalle.TextAntiAliasingQuality = TextAntiAliasingQuality.High;
-
-            area.AxisX.MajorGrid.LineColor = Color.LightGray;
-            area.AxisY.MajorGrid.LineColor = Color.LightGray;
-            area.AxisX.MinorGrid.Enabled = false;
-            area.AxisY.MinorGrid.Enabled = false;
-
-            area.AxisX.LabelStyle.Format = "0.###";
-            area.AxisY.LabelStyle.Format = "0.###";
-
-            right.Controls.Add(chartDetalle);
-            chartDetalle.BringToFront();
-        }
-
         private void CargarSimulaciones()
         {
             _todas = FileManager.LeerSimulaciones();
@@ -186,27 +164,17 @@ namespace Proyecto_Integrador.View
 
         private void AjustarColumnas()
         {
-            // Ocultar el Id de la SIMULACIÓN (Guid)
             if (dgvSimulaciones.Columns["Id"] != null)
-            {
                 dgvSimulaciones.Columns["Id"].Visible = false;
-            }
 
-            // Renombrar la columna del alumno
             if (dgvSimulaciones.Columns["IdAlumno"] != null)
-            {
                 dgvSimulaciones.Columns["IdAlumno"].HeaderText = "Matrícula";
-            }
 
             if (dgvSimulaciones.Columns["Usuario"] != null)
-            {
                 dgvSimulaciones.Columns["Usuario"].HeaderText = "Usuario";
-            }
 
             if (dgvSimulaciones.Columns["NombreCompleto"] != null)
-            {
                 dgvSimulaciones.Columns["NombreCompleto"].HeaderText = "Nombre completo";
-            }
         }
 
         private bool EstaCalificada(Simulacion s)
@@ -253,17 +221,14 @@ namespace Proyecto_Integrador.View
             lblResumen.Text = Resumen(sim);
             DibujarSimulacion(sim);
 
-            // Comentario que escribió el estudiante
             txtComentario.Text = sim.ComentarioEstudiante ?? "";
 
-            // Cambiar el texto del label para que muestre el nombre del alumno
             var nombre = string.IsNullOrWhiteSpace(sim.NombreCompleto)
                 ? sim.Usuario
                 : sim.NombreCompleto;
 
             lblComentario.Text = $"Comentario de {nombre}:";
 
-            // Cargar la nota si ya existe
             var calif = _califs.FirstOrDefault(c => c.SimulacionId == sim.Id);
             if (calif != null)
                 txtNota.Text = calif.Nota.ToString("0.0#");
@@ -280,31 +245,28 @@ namespace Proyecto_Integrador.View
 
         private void DibujarSimulacion(Simulacion s)
         {
-            chartDetalle.Series.Clear();
+            var area = chartDetalle.ChartAreas["main"];
+            var serie = chartDetalle.Series["Simulacion"];
 
-            var serie = new Series("Simulación")
-            {
-                ChartType = SeriesChartType.Spline,   // curva suave
-                ChartArea = "main",
-                BorderWidth = 3,
-                MarkerStyle = MarkerStyle.Circle,
-                MarkerSize = 5,
-                IsValueShownAsLabel = false
-            };
+            serie.Points.Clear();
 
-            // Color distinto según el tipo de circuito
+            
+            serie.ChartType = SeriesChartType.Spline;
+            serie.BorderWidth = 3;
+            serie.MarkerStyle = MarkerStyle.Circle;
+            serie.MarkerSize = 5;
+
             if (s.TipoCircuito == "RC")
             {
                 serie.Color = Color.SteelBlue;
                 serie.BorderColor = Color.SteelBlue;
             }
-            else // RL
+            else
             {
                 serie.Color = Color.IndianRed;
                 serie.BorderColor = Color.IndianRed;
             }
 
-            // 1️⃣ Constante de tiempo τ
             double tau = s.TipoCircuito == "RC"
                 ? s.R * s.C
                 : s.L / s.R;
@@ -315,18 +277,15 @@ namespace Proyecto_Integrador.View
                 return;
             }
 
-            // 2️⃣ Rango de tiempo a graficar: hasta 5·τ o tmax, lo que sea menor
             double tMaxGrafica = Math.Min(s.TiempoMaximo, 5.0 * tau);
             if (tMaxGrafica <= 0) tMaxGrafica = s.TiempoMaximo;
-            if (tMaxGrafica <= 0) tMaxGrafica = tau * 5; // fallback
+            if (tMaxGrafica <= 0) tMaxGrafica = tau * 5;
 
-            // 3️⃣ Número de puntos y paso solo para la gráfica
             int nPuntos = 300;
             double dt = tMaxGrafica / nPuntos;
 
             double maxValor = 0.0;
 
-            // 4️⃣ Generar puntos directamente en la serie
             for (double time = 0.0; time <= tMaxGrafica + dt / 2.0; time += dt)
             {
                 double valor;
@@ -337,7 +296,7 @@ namespace Proyecto_Integrador.View
                         ? s.V0 * Math.Exp(-time / tau)
                         : s.V * (1 - Math.Exp(-time / tau));
                 }
-                else // RL
+                else
                 {
                     valor = s.Modo == "Apagado"
                         ? (s.V / s.R) * Math.Exp(-time / tau)
@@ -349,37 +308,28 @@ namespace Proyecto_Integrador.View
                 serie.Points.AddXY(time, valor);
             }
 
-            chartDetalle.Series.Add(serie);
-
-            var area = chartDetalle.ChartAreas["main"];
             area.AxisX.Title = "Tiempo (s)";
             area.AxisY.Title = s.TipoCircuito == "RC" ? "Voltaje (V)" : "Corriente (A)";
 
-            // Fondo con degradado (distinto tono según tipo)
             area.BackColor = Color.White;
             area.BackSecondaryColor = (s.TipoCircuito == "RC")
-                ? Color.FromArgb(230, 240, 255)   // azul clarito
-                : Color.FromArgb(255, 235, 235);  // rojo clarito
+                ? Color.FromArgb(230, 240, 255)
+                : Color.FromArgb(255, 235, 235);
             area.BackGradientStyle = GradientStyle.TopBottom;
 
-            // Rejilla más suave
             area.AxisX.MajorGrid.LineColor = Color.LightGray;
             area.AxisY.MajorGrid.LineColor = Color.LightGray;
             area.AxisX.MinorGrid.Enabled = false;
             area.AxisY.MinorGrid.Enabled = false;
 
-            // 👉 Zoom al rango útil [0, tMaxGrafica]
             area.AxisX.Minimum = 0;
             area.AxisX.Maximum = tMaxGrafica;
             area.AxisX.Interval = tMaxGrafica / 5.0;
 
-            // Escala de eje Y para que no se aplaste
             area.AxisY.Minimum = 0;
             area.AxisY.Maximum = (maxValor > 0) ? maxValor * 1.1 : 1;
 
-            // Limpiamos las líneas verticales anteriores (τ, 2τ, 3τ)
             area.AxisX.StripLines.Clear();
-
             if (tau <= tMaxGrafica) AgregarLinea(area, tau, "τ");
             if (2 * tau <= tMaxGrafica) AgregarLinea(area, 2 * tau, "2τ");
             if (3 * tau <= tMaxGrafica) AgregarLinea(area, 3 * tau, "3τ");
@@ -414,7 +364,6 @@ namespace Proyecto_Integrador.View
 
             var califs = FileManager.LeerCalificaciones();
 
-            // Si ya existía calificación para esta simulación, la actualizamos
             var existente = califs.FirstOrDefault(c => c.SimulacionId == sim.Id);
 
             if (existente == null)
